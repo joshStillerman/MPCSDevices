@@ -84,9 +84,9 @@ class LIFT_COIL(MDSplus.Device):
         {
           'path': ':GUID',
           'type': 'text',
-          'value': '3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866'
+          'value': '3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866',
           'options': ('no_write_shot',)
-        }
+        },
         {
           'path': ':COMMENT', 
           'type': 'text', 
