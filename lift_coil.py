@@ -68,7 +68,6 @@ class LIFT_COIL(MDSplus.Device):
 
     Methods:
        check - make sure Recipe matches, what else
-       make_simulink - create a .m file that provides this blockE
        configure
        start
        stop
@@ -83,9 +82,15 @@ class LIFT_COIL(MDSplus.Device):
 
     parts = [
         {
+          'path': ':GUID',
+          'type': 'text',
+          'value': '3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866'
+          'options': ('no_write_shot',)
+        }
+        {
           'path': ':COMMENT', 
           'type': 'text', 
-          'options': ('no_write_shot')
+          'options': ('no_write_shot',)
         },
         {
           'path': '.PARAMETERS', 
@@ -100,28 +105,28 @@ class LIFT_COIL(MDSplus.Device):
           'path': '.PARAMETERS.CONFIG:DIRECTION', 
           'type': 'text', 
           'value': "up", 
-          'options': ('no_write_shot'), 
+          'options': ('no_write_shot',), 
           'help': 'Is the coil pointing up or down (right hand rule)'
         },
         {
           'path': '.PARAMETERS.CONFIG:TURNS', 
           'type': 'numeric', 
           'value': 100, 
-          'options': ('no_write_shot'), 
+          'options': ('no_write_shot',), 
           'help': 'Number of turns in the coil'
         },
         {
           'path': '.PARAMETERS.CONFIG:R', 
           'type': 'numeric', 
           'value': .05, 
-          'options': ('no_write_shot'), 
+          'options': ('no_write_shot',), 
           'help':'Radius of coil in M'
         },
         {
           'path': '.PARAMETERS.CONFIG:Z', 
           'type': 'numeric', 
           'value': .07, 
-          'options': ('no_write_shot'), 
+          'options': ('no_write_shot',), 
           'help':'Distance of coil from center in M'
         },
         {
@@ -132,7 +137,7 @@ class LIFT_COIL(MDSplus.Device):
           'path': '.PARAMETERS.RECIPE:PS_VOLT', 
           'type': 'numeric', 
           'value': 18, 
-          'options': ('no_write_shot'), 
+          'options': ('no_write_shot',), 
           'help':'Power Supply Voltage Setting'
         },
         {
@@ -180,21 +185,21 @@ class LIFT_COIL(MDSplus.Device):
           'options': ('no_write_shot',)
         },
         {
-          'path': ':CONFIG_ACTION', 
+          'path': ':CONF_ACTION', 
           'type': 'action',
-          'valueExpr': "Action(Dispatch('S','CONFIG',50,None),Method(None,'START'',head))", 
+          'valueExpr': "Action(Dispatch('S','CONFIG',50,None),Method(None,'CONFIG',head))", 
           'options': ('no_write_shot',)
         },
         {
           'path': ':START_ACTION', 
           'type': 'action',
-          'valueExpr': "Action(Dispatch('S','PREPULSE',50,None),Method(None,'START'',head))", 
+          'valueExpr': "Action(Dispatch('S','PREPULSE',50,None),Method(None,'START',head))", 
           'options': ('no_write_shot',)
         },
         {
           'path': ':STOP_ACTION', 
           'type': 'action',
-          'valueExpr': "Action(Dispatch('S','DONE',50,None),Method(None,'START'',head))", 
+          'valueExpr': "Action(Dispatch('S','DONE',50,None),Method(None,'STOP',head))", 
           'options': ('no_write_shot',)
         },
     ]
