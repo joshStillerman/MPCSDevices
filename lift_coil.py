@@ -26,8 +26,7 @@ import MDSplus
 import time
 import datetime
 import numpy as np
-import MPCSContract
-class LIFT_COIL(MPCSContract._MPCSContract):
+class LIFT_COIL(MDSplus.Device):
     """
 
     Lift Coil for levitated bagel.
@@ -274,4 +273,10 @@ class LIFT_COIL(MPCSContract._MPCSContract):
         import uuid
         head = super(LIFT_COIL, LIFT_COIL).Add(*a, **ka)
         head.this_guid.record = str(uuid.uuid4())
+        for node in head.getConglomerateNodes():
+            if not node == head:
+                if node.no_write_shot and node.write_once:
+                    node.write_once = False
+                    node.setExtendedAttribute('Muttable', 0)
+                    node.write_once = True
         return head
