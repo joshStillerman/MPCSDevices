@@ -71,7 +71,19 @@ class LIFT_COIL(MDSplus.Device):
           'path': ':GUID',
           'type': 'text',
           'value': '3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866',
-          'options': ('no_write_shot',)
+          'options': ('write_once', 'no_write_shot',)
+        },
+        {
+          'path': ':THIS_GUID',
+          'type': 'text',
+          'options': ('write_once', 'no_write_shot',),
+          'help':'The GUID of this instance.'
+        },
+        {
+          'path': ':NAME',
+          'type': 'text',
+          'options': ('write_once', 'no_write_shot',),
+          'help':'The name of this actuator coil'
         },
         {
           'path': ':COMMENT', 
@@ -218,6 +230,12 @@ class LIFT_COIL(MDSplus.Device):
           'help':'Multicast address'
         },
         {
+          'path': '.COMMS:NAME',
+          'type': 'text',
+          'options': ('write_once', 'no_write_shot',),
+          'help':'Name string to send with the message'
+        },
+        {
           'path': ':CHECK_ACTION', 
           'type': 'action',
           'valueExpr': "Action(Dispatch('S','CHECK',50,None),Method(None,'CHECK',head))", 
@@ -250,3 +268,7 @@ class LIFT_COIL(MDSplus.Device):
         if self.debug == None:
             self.debug = os.getenv("DEBUG_DEVICES")
         return(self.debug)
+
+    def addDevice(self, name, model):
+        ans = self.super().addDevice(self, name, model)
+        help(ans)

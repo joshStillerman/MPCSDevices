@@ -13,7 +13,7 @@ export MDS_PYDEVICE_PATH="$MDS_PYDEVICE_PATH;$PWD/MPCSDevices"
 Then you can add a lift_coil device to your tree:
 ```
 jas@mfews-jas:~/MPCSDevices$ mdstcl
-TCL> edit test
+TCL> edit test /new
 TCL> add node topcoil /model=lift_coil
 \TEST::TOP:TOPCOIL:GUID TEXT 3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866
 \TEST::TOP:TOPCOIL.PARAMETERS.IMMUTTABLE:DIRECTION TEXT up
@@ -36,4 +36,5 @@ TCL> add node topcoil /model=lift_coil
 \TEST::TOP:TOPCOIL:CONF_ACTION ACTION Action(Dispatch('S','CONFIG',50,None),Method(None,'CONFIG',head))
 \TEST::TOP:TOPCOIL:START_ACTION ACTION Action(Dispatch('S','PREPULSE',50,None),Method(None,'START',head))
 \TEST::TOP:TOPCOIL:STOP_ACTION ACTION Action(Dispatch('S','DONE',50,None),Method(None,'STOP',head))
+TCL> exit
 ```
