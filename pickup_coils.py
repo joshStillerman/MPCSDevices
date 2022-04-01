@@ -27,32 +27,40 @@ import time
 import datetime
 import numpy as np
 
-class LIFT_COIL(MDSplus.Device):
+class PICKUP_COILS(MDSplus.Device):
     """
 
-    Lift Coil for levitated bagel.
+    Pickup Coils for levitated bagel.
 
-    Dnventually there will be 2 one top and one bottom, for now
-    there is only 1
+    Set of 3 pickup coils for the levitated bagel.
 
-    The lift coil accepts a demand as a floating point value from -1. to 1. to
-    tell the chopper about the duty cycle and direction.
+    From d-tacq at 10kHz
 
-    The physical quanity being controled is Volts in the coil.
+    This will arrive on the MSDN as 32 shorts at 10kHz
+    
+    The physical quanity being controled is webers/sec.
 
     HAL is done by PCS
-    Rate is 500 Hz
+    Rate is 10000 Hz
     Immuttable Parameters
-       Direction
-       Number of Turns
-       Z_Pos  (do we need top and bottom ? or is this the pos of the middle ?)
-       Radius
-       Raw_Shape
-       Phys_Shape
-       Raw_Type
-       Phys_Type
+       raw_shape
+       raw_type
+       phys_shape
+       phys_type
+       selector [3]
+       full_coil
+         r
+         z[2]
+         turns[2]
+         direction[2]
+       half_coils
+         z[2]
+         r[2]
+         turns[2]
+         direction[2]  (4?)
+         phi[2]
     Muttable Parameters
-       Voltage setting on PS
+      none
     Communications:
        SDN
 
@@ -70,7 +78,7 @@ class LIFT_COIL(MDSplus.Device):
         {
           'path': ':GUID',
           'type': 'text',
-          'value': '3cdd2a9a-b2f7-4ff2-b018-4cebbfaaf866',
+          'value': '2656b13a-00d6-4e87-a39e-eeb92cf71b36',
           'options': ('write_once', 'no_write_shot',)
         },
         {
@@ -83,7 +91,7 @@ class LIFT_COIL(MDSplus.Device):
           'path': ':NAME',
           'type': 'text',
           'options': ('write_once', 'no_write_shot',),
-          'help':'The name of this actuator coil'
+          'help':'The name of this set of pickup coils'
         },
         {
           'path': ':COMMENT', 
@@ -98,34 +106,6 @@ class LIFT_COIL(MDSplus.Device):
           'path': '.PARAMETERS.IMMUTTABLE', 
           'type': 'structure', 
           'help': 'Parameters with fixed values for this contract'
-        },
-        {
-          'path': '.PARAMETERS.IMMUTTABLE:DIRECTION', 
-          'type': 'text', 
-          'value': "up", 
-          'options': ('no_write_shot','write_once',), 
-          'help': 'Is the coil pointing up or down (right hand rule)'
-        },
-        {
-          'path': '.PARAMETERS.IMMUTTABLE:TURNS', 
-          'type': 'numeric', 
-          'value': 100, 
-          'options': ('no_write_shot','write_once',), 
-          'help': 'Number of turns in the coil'
-        },
-        {
-          'path': '.PARAMETERS.IMMUTTABLE:R', 
-          'type': 'numeric', 
-          'value': .05, 
-          'options': ('no_write_shot','write_once',), 
-          'help':'Radius of coil in M'
-        },
-        {
-          'path': '.PARAMETERS.IMMUTTABLE:Z', 
-          'type': 'numeric', 
-          'value': .07, 
-          'options': ('no_write_shot','write_once',), 
-          'help':'Distance of coil from center in M'
         },
         {
           'path': '.PARAMETERS.IMMUTTABLE:RAW_SHAPE',
@@ -158,7 +138,7 @@ class LIFT_COIL(MDSplus.Device):
         {
           'path': '.PARAMETERS.IMMUTTABLE:RATE',
           'type': 'numeric',
-          'value': 500,
+          'value': 10000,
           'options': ('no_write_shot','write_once',),
           'help':'rate in Hz'
         },
@@ -170,37 +150,101 @@ class LIFT_COIL(MDSplus.Device):
           'help':'Phase of timing relative to even second'
         },
         {
-          'path': '.PARAMETERS.MUTTABLE', 
-          'type': 'structure'
+          'path': '.PARAMETERS.IMMUTTABLE.FULL_COIL',
+          'type': 'structure',
+        },
+        { 
+          'path': '.PARAMETERS.IMMUTTABLE.FULL_COIL:R',
+          'type': 'numeric',
+          'value': .05,
+          'options': ('no_write_shot','write_once',),
+          'help':'radius of the double loop in m'
         },
         {
-          'path': '.PARAMETERS.MUTTABLE:PS_VOLT', 
-          'type': 'numeric', 
-          'value': 18, 
-          'options': ('no_write_shot',), 
-          'help': 'Power Supply Voltage Setting'
+          'path': '.PARAMETERS.IMMUTTABLE.FULL_COIL:Z',
+          'type': 'numeric',
+          'value': MDSplus.Float64Array([.07,.09]),
+          'options': ('no_write_shot','write_once',),
+          'help':'z position of the double loops in m'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE.FULL_COIL:TURNS',
+          'type': 'numeric',
+          'value': MDSplus.Int32Array([10, 10]),
+          'options': ('no_write_shot','write_once',),
+          'help':'number of turns in the 2 full loops'
+        },
+          { 
+          'path': '.PARAMETERS.IMMUTTABLE.HALF_COILS',
+          'type': 'structure',
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE.HALF_COILS:R',
+          'type': 'numeric',
+          'value': MDSplus.Float64Array([.05,.05]),
+          'options': ('no_write_shot','write_once',),
+          'help':'radius of the half loops in m'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE.HALF_COILS:Z',
+          'type': 'numeric',
+          'value': MDSplus.Float64Array([.065,.065]),
+          'options': ('no_write_shot','write_once',),
+          'help':'z position of the half loops in m'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE.HALF_COILS:TURNS',
+          'type': 'numeric',
+          'value': MDSplus.Int32Array([10,10]),
+          'options': ('no_write_shot','write_once',),
+          'help':'number of turns in the 2 half loops'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE.HALF_COILS:PHI',
+          'type': 'numeric',
+          'value': MDSplus.Float64Array([0.,90.]),
+          'options': ('no_write_shot','write_once',),
+          'help':'angle of start of 2 half loops'
+        },
+        {
+          'path': '.PARAMETERS.MUTTABLE', 
+          'type': 'structure'
         },
         {
           'path': '.SIGNALS',
           'type': 'structure'
         },
         {
-          'path': '.SIGNALS:DEMAND', 
-          'type': 'signal',  
+          'path': '.SIGNALS:SELECTORS', 
+          'type': 'NUMERIC',
+          'value': MDSplus.Int32Array([0,1,2]),
           'options': ('no_write_model', 'write_once',), 
-          'help':'Demand voltage requested'
+          'help':'Which channels from recieved data to select'
         },
         {
-          'path': '.SIGNALS:DEMAND:HAL',
+          'path': '.SIGNALS:NAMES',
+          'type': 'TEXT',
+          'value': MDSplus.StringArray(['top','half-1','half-2']),
+          'options': ('no_write_model', 'write_once',), 
+          'help':'names of the selected values'
+        },
+        {
+          'path': '.SIGNALS:FLUX',
+          'type': 'signal',
+          'options': ('no_write_model','write_once',),
+          'help':'Expression to make values from demand voltages'
+        },
+        {
+          'path': '.SIGNALS:FLUX:HAL',
           'type': 'text',
-          'value': '_out := _in * 1. + 0.',
+          'value': '_out := _in * [1.,1.,1.] + [0., 0., 0.]', 
           'options': ('no_write_shot',),
           'help':'Expression to make values from demand voltages'
         },
         {
           'path': '.SIGNALS:MAX_MISSING',
           'type': 'numeric',
-          'value': 1,
+          'value': 10,
           'options': ('no_write_shot',),
           'help':'Maximum allowed missing samples'
         },
