@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 # MDSplus trees
-.tree
-.characteristics
-.datafile
+*.tree
+*.characteristics
+*.datafile
