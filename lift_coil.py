@@ -27,20 +27,6 @@ import time
 import datetime
 import numpy as np
 
-if MDSplus.version.ispy2:
-    def tostr(x):
-        return x
-
-    def tobytes(x):
-        return x
-else:
-    def tostr(x):
-        return b if isinstance(b, str) else b.decode('utf-8')
-
-    def tobytes(x):
-        return s if isinstance(s, bytes) else s.encode('utf-8')
-
-
 class LIFT_COIL(MDSplus.Device):
     """
 
@@ -56,13 +42,17 @@ class LIFT_COIL(MDSplus.Device):
 
     HAL is done by PCS
     Rate is 500 Hz
-    Recipe
-       Voltage setting on PS
-    Configuration
+    Immuttable Parameters
        Direction
        Number of Turns
        Z_Pos  (do we need top and bottom ? or is this the pos of the middle ?)
        Radius
+       Raw_Shape
+       Phys_Shape
+       Raw_Type
+       Phys_Type
+    Muttable Parameters
+       Voltage setting on PS
     Communications:
        SDN
 
@@ -74,10 +64,6 @@ class LIFT_COIL(MDSplus.Device):
 
     debugging() - is debugging enabled.
                   Controlled by environment variable DEBUG_DEVICES
-
-    THINK ABOUT:  Config values here?  or references, if here can check against current truth
-    THINK ABOUT:  Recipe values here?  or references, if here can check against current truth
-
     """
 
     parts = [
@@ -97,48 +83,90 @@ class LIFT_COIL(MDSplus.Device):
           'type': 'structure'
         },
         {
-          'path': '.PARAMETERS.CONFIG', 
+          'path': '.PARAMETERS.IMMUTTABLE', 
           'type': 'structure', 
-          'help': 'Configuration parameters are parameters that in general do not change'
+          'help': 'Parameters with fixed values for this contract'
         },
         {
-          'path': '.PARAMETERS.CONFIG:DIRECTION', 
+          'path': '.PARAMETERS.IMMUTTABLE:DIRECTION', 
           'type': 'text', 
           'value': "up", 
-          'options': ('no_write_shot',), 
+          'options': ('no_write_shot','write_once',), 
           'help': 'Is the coil pointing up or down (right hand rule)'
         },
         {
-          'path': '.PARAMETERS.CONFIG:TURNS', 
+          'path': '.PARAMETERS.IMMUTTABLE:TURNS', 
           'type': 'numeric', 
           'value': 100, 
-          'options': ('no_write_shot',), 
+          'options': ('no_write_shot','write_once',), 
           'help': 'Number of turns in the coil'
         },
         {
-          'path': '.PARAMETERS.CONFIG:R', 
+          'path': '.PARAMETERS.IMMUTTABLE:R', 
           'type': 'numeric', 
           'value': .05, 
-          'options': ('no_write_shot',), 
+          'options': ('no_write_shot','write_once',), 
           'help':'Radius of coil in M'
         },
         {
-          'path': '.PARAMETERS.CONFIG:Z', 
+          'path': '.PARAMETERS.IMMUTTABLE:Z', 
           'type': 'numeric', 
           'value': .07, 
-          'options': ('no_write_shot',), 
+          'options': ('no_write_shot','write_once',), 
           'help':'Distance of coil from center in M'
         },
         {
-          'path': '.PARAMETERS.RECIPE', 
+          'path': '.PARAMETERS.IMMUTTABLE:RAW_SHAPE',
+          'type': 'numeric',
+          'value': 1,
+          'options': ('no_write_shot','write_once',),
+          'help':'Shape of data on the wire'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE:PHYS_SHAPE',
+          'type': 'numeric',
+          'value': 1,
+          'options': ('no_write_shot','write_once',),
+          'help':'Shape of data in physics Units'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE:RAW_TYPE',
+          'type': 'text',
+          'value': 'float',
+          'options': ('no_write_shot','write_once',),
+          'help':'Type of the data on the wire'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE:PHYS_TYPE',
+          'type': 'text',
+          'value': 'float',
+          'options': ('no_write_shot','write_once',),
+          'help':'Type of the data in physics units'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE:RATE',
+          'type': 'numeric',
+          'value': 500,
+          'options': ('no_write_shot','write_once',),
+          'help':'rate in Hz'
+        },
+        {
+          'path': '.PARAMETERS.IMMUTTABLE:PHASE',
+          'type': 'numeric',
+          'value': 0.0,
+          'options': ('no_write_shot','write_once',),
+          'help':'Phase of timing relative to even second'
+        },
+        {
+          'path': '.PARAMETERS.MUTTABLE', 
           'type': 'structure'
         },
         {
-          'path': '.PARAMETERS.RECIPE:PS_VOLT', 
+          'path': '.PARAMETERS.MUTTABLE:PS_VOLT', 
           'type': 'numeric', 
           'value': 18, 
           'options': ('no_write_shot',), 
-          'help':'Power Supply Voltage Setting'
+          'help': 'Power Supply Voltage Setting'
         },
         {
           'path': '.SIGNALS',
@@ -158,25 +186,36 @@ class LIFT_COIL(MDSplus.Device):
           'help':'Expression to make values from demand voltages'
         },
         {
-          'path': '.SIGNALS:RATE',
-          'type': 'numeric',
-          'value': 500,
-          'options': ('no_write_shot',),
-          'help':'rate in Hz'
-        },
-        {
-          'path': '.SIGNALS:PHASE',
-          'type': 'numeric',
-          'value': 0.0,
-          'options': ('no_write_shot',),
-          'help':'Phase of timing relative to even second'
-        },
-        {
           'path': '.SIGNALS:MAX_MISSING',
           'type': 'numeric',
           'value': 1,
           'options': ('no_write_shot',),
           'help':'Maximum allowed missing samples'
+        },
+        {
+          'path': '.COMMS',
+          'type': 'structure',
+        },
+        {
+          'path': '.COMMS:TRANSPORT',
+          'type': 'text',
+          'value': 'SDN',
+          'options': ('no_write_shot','write_once',),
+          'help':'Use SDN for communication'
+        },
+        {
+          'path': '.COMMS:ADDRESS',
+          'type': 'text',
+          'value': '244.0.0.0',
+          'options': ('no_write_shot','write_once',),
+          'help':'Multicast address'
+        },
+        {
+          'path': '.COMMS:PORT',
+          'type': 'numeric',
+          'value': 1234,
+          'options': ('no_write_shot','write_once',),
+          'help':'Multicast address'
         },
         {
           'path': ':CHECK_ACTION', 
