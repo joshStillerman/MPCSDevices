@@ -26,8 +26,8 @@ import MDSplus
 import time
 import datetime
 import numpy as np
-
-class LIFT_COIL(MDSplus.Device):
+import MPCSContract
+class LIFT_COIL(MPCSContract._MPCSContract):
     """
 
     Lift Coil for levitated bagel.
@@ -268,3 +268,10 @@ class LIFT_COIL(MDSplus.Device):
         if self.debug == None:
             self.debug = os.getenv("DEBUG_DEVICES")
         return(self.debug)
+
+    @staticmethod
+    def Add(*a, **ka):
+        import uuid
+        head = super(LIFT_COIL, LIFT_COIL).Add(*a, **ka)
+        head.this_guid.record = str(uuid.uuid4())
+        return head

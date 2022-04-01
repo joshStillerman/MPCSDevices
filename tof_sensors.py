@@ -251,3 +251,11 @@ class TOF_SENSORS(MDSplus.Device):
         if self.debug == None:
             self.debug = os.getenv("DEBUG_DEVICES")
         return(self.debug)
+
+    @staticmethod
+    def Add(*a, **ka):
+        import uuid
+        head = super(TOF_SENSORS, TOF_SENSORS).Add(*a, **ka)
+        head.this_guid.record = str(uuid.uuid4())
+        return head
+
